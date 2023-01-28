@@ -29,3 +29,8 @@ footer {
   color: white;
   font-weight: bold;
 }
+
+aside {
+  grid-row: 2 / 3;
+  grid-column: 1 / 3;
+}
