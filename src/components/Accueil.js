@@ -19,8 +19,9 @@ const Accueil = () => {
   const [isopen, setIsOpen] = useState(false);
   const [encherir, setRencherir] = useState(false);
   const [etat, setEtat] = useState(0);
-  const [enchereid,setId]=useState(0);
-  const [montantmax,setMontant]=useState(0);
+  const [enchereid, setId] = useState(0);
+  const [montantmax, setMontant] = useState(0);
+  const [erreur, setErreur] = useState(null);
 
   //login client
   function verifyLogin() {
@@ -31,6 +32,7 @@ const Accueil = () => {
         sessionStorage.setItem("TokenUser", response.data["token"]);
         sessionStorage.setItem("idUser", response.data["iduser"]);
         console.log(response.data);
+        console.log(sessionStorage.getItem("idUser"));
         setEtat(0);
         setIsOpen(false);
         setRencherir(true);
@@ -87,7 +89,7 @@ const Accueil = () => {
       setEnchere(res.data);
     })
   }
-  function rencherir(id,montant) {
+  function rencherir(id, montant) {
     setId(id);
     setMontant(montant);
     if (sessionStorage.getItem("TokenUser") == null) {
@@ -97,11 +99,16 @@ const Accueil = () => {
       setRencherir(true);
     }
   }
-  function ValiderRencherir(){
-    axios.post("http://localhost:4444/miser/"+enchereid+"/"+sessionStorage.getItem("TokenUser"),null,{params:{"idclient":sessionStorage.getItem("idUser"),"montant":document.getElementById("montantdonne").value}}).then((res)=>{
-    setRencherir(false);
-    window.location.reload();  
-  })
+  function ValiderRencherir() {
+    axios.post("http://localhost:4444/miser/" + enchereid + "/" + sessionStorage.getItem("TokenUser"), null, { params: { "idclient": sessionStorage.getItem("idUser"), "montant": document.getElementById("montantdonne").value } }).then((res) => {
+      console.log(res.data); 
+    if (res.data["Compte"] != null) {
+        setErreur(res.data["Compte"]);
+      } else {
+        setRencherir(false);
+        window.location.reload();
+      }
+    })
   }
 
   return (
@@ -137,8 +144,12 @@ const Accueil = () => {
                       <Card>
                         {
                           value.statut !== "Termine" ?
-                            <Icon.BagPlusFill style={{ cursor: 'pointer' }} onClick={rencherir.bind(this,value.idEnchere,value.montant)} />
-                            : <Icon.StopBtn />
+                            sessionStorage.getItem("idUser") != null && parseInt(value.idClient) === parseInt(sessionStorage.getItem("idUser")) ?
+                              <Icon.DoorClosed style={{ cursor: 'pointer' }} />
+                              :
+                              <Icon.BagPlusFill style={{ cursor: 'pointer' }} onClick={rencherir.bind(this, value.idEnchere, value.montant)} />
+                            :
+                            <Icon.StopBtn />
                         }
                         {/* <Card.Img variant="top" src="holder.js/100px160" /> */}
                         <Card.Body>
@@ -225,11 +236,19 @@ const Accueil = () => {
           <Modal.Title>Renchérir</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p style={{color:"red"}}>* Montant minimale: {montantmax}</p>
+          <p style={{ color: "red" }}>* Montant minimale: {montantmax}</p>
           <input type="number" id="montantdonne" placeholder="Montant" className="form-control form-control-lg"></input>
           <Button variant="primary" onClick={ValiderRencherir}>
             Valider
           </Button>
+          {
+            erreur !== null ?
+              <Alert key={"danger"} variant={"danger"}>
+                {erreur}
+              </Alert>
+              :
+              ''
+          }
         </Modal.Body>
       </Modal>
 
