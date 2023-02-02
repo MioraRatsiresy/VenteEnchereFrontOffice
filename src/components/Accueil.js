@@ -38,7 +38,9 @@ const Accueil = () => {
         console.log(sessionStorage.getItem("idUser"));
         setEtat(0);
         setIsOpen(false);
+        if(montantmax!==0){
         setRencherir(true);
+        }
         //navigate("/accueil");
       }
       else {
@@ -55,6 +57,7 @@ const Accueil = () => {
         var retour = JSON.parse(this.responseText);
         if (retour['message'] === "Logout with success") {
           sessionStorage.clear();
+          setMontant(0);
           navigate("/");
         }
         else {
@@ -142,7 +145,7 @@ const Accueil = () => {
               <div onClick={logout} style={{ cursor: "pointer" }}>Logout</div>
             </>
             :
-            ''
+            <div onClick={() => setIsOpen(true)} style={{ cursor: "pointer" }}>Login</div>
         }
       </header>
       <aside style={{ margin: "2%" }}>
@@ -192,7 +195,7 @@ const Accueil = () => {
             ''
         }
       </aside>
-      <footer className="text-center text-white" style={{ backgroundColor: "#f1f1f1" }}>
+      <footer className="text-center text-white" style={{ backgroundColor: "rgb(152, 99, 187)" }}>
         <div className="container pt-4">
           <section className="mb-4">
             <a
@@ -237,8 +240,8 @@ const Accueil = () => {
           </section>
         </div>
 
-        <div className="text-center text-dark p-3" >
-          <p> 1502,1391</p>
+        <div className="text-center p-3" style={{ backgroundColor: "rgb(15, 99, 187)" }}>
+          <p style={{ height: 10 }}> 1502,1391</p>
         </div>
       </footer>
 
@@ -249,11 +252,6 @@ const Accueil = () => {
           <Modal.Title>Renchérir</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p style={{ color: "red" }}>* Montant minimale: {montantmax}</p>
-          <input type="number" id="montantdonne" placeholder="Montant" className="form-control form-control-lg"></input>
-          <Button variant="primary" onClick={ValiderRencherir}>
-            Valider
-          </Button>
           {
             erreur !== null ?
               <Alert key={"danger"} variant={"danger"}>
@@ -262,91 +260,96 @@ const Accueil = () => {
               :
               ''
           }
+          <p style={{ color: "red" }}>* Montant minimal: {montantmax}</p>
+          <input type="number" id="montantdonne" placeholder="Montant" className="form-control form-control-lg"></input>
+          <Button variant="primary" onClick={ValiderRencherir}>
+            Valider
+          </Button>
         </Modal.Body>
       </Modal>
 
       {/* modal fiche */}
       <Modal show={voirfiche} onHide={() => setVoirFiche(false)}>
-      <Icon.XSquare style={{cursor:'pointer'}} onClick={()=>setVoirFiche(false)}/>
-          {
-            fiche != null ?
-              fiche["fiche"].map((value) => {
-                return (
-                    <MDBContainer key={value.idEnchere} className="py-5 h-100" >
-                      <MDBRow>
-                        <MDBCol xl="12">
-                          <MDBCard>
-                            <div className="rounded-top text-white d-flex flex-row" style={{ backgroundColor: '#000', height: '200px' }}>
-                              <div className="ms-4 mt-5 d-flex flex-column" style={{ width: '150px' }}>
-                                <MDBCardImage src={imgvente}
-                                  alt="imgvente" className="mt-4 mb-2 img-thumbnail" fluid style={{ width: '150px', zIndex: '1' }} />
-                              </div>
-                              <div className="ms-3" style={{ marginTop: '130px' }}>
-                                <MDBTypography tag="h5">{value.libelle}</MDBTypography>
-                                <MDBCardText>Categorie: {value.categorie}</MDBCardText>
-                              </div>
+        <Icon.XSquare style={{ cursor: 'pointer' }} onClick={() => setVoirFiche(false)} />
+        {
+          fiche != null ?
+            fiche["fiche"].map((value) => {
+              return (
+                <MDBContainer key={value.idEnchere} className="py-5 h-100" >
+                  <MDBRow>
+                    <MDBCol xl="12">
+                      <MDBCard>
+                        <div className="rounded-top text-white d-flex flex-row" style={{ backgroundColor: '#000', height: '200px' }}>
+                          <div className="ms-4 mt-5 d-flex flex-column" style={{ width: '150px' }}>
+                            <MDBCardImage src={imgvente}
+                              alt="imgvente" className="mt-4 mb-2 img-thumbnail" fluid style={{ width: '150px', zIndex: '1' }} />
+                          </div>
+                          <div className="ms-3" style={{ marginTop: '130px' }}>
+                            <MDBTypography tag="h5">{value.libelle}</MDBTypography>
+                            <MDBCardText>Categorie: {value.categorie}</MDBCardText>
+                          </div>
+                        </div>
+                        <div className="p-4 text-black" style={{ backgroundColor: '#f8f9fa' }}>
+                          <div className="d-flex justify-content-end text-center py-1">
+                            <div>
+                              <MDBCardText className="mb-1 h5">{value.montant}</MDBCardText>
+                              <MDBCardText className="small text-muted mb-0">Prix</MDBCardText>
                             </div>
-                            <div className="p-4 text-black" style={{ backgroundColor: '#f8f9fa' }}>
-                              <div className="d-flex justify-content-end text-center py-1">
-                                <div>
-                                  <MDBCardText className="mb-1 h5">{value.montant}</MDBCardText>
-                                  <MDBCardText className="small text-muted mb-0">Prix</MDBCardText>
-                                </div>
-                                <div className="px-3">
-                                  <MDBCardText className="mb-1 h5">{value.statut}</MDBCardText>
-                                  <MDBCardText className="small text-muted mb-0">Statut</MDBCardText>
-                                </div>
-                              </div>
+                            <div className="px-3">
+                              <MDBCardText className="mb-1 h5">{value.statut}</MDBCardText>
+                              <MDBCardText className="small text-muted mb-0">Statut</MDBCardText>
                             </div>
-                            <MDBCardBody className="text-black p-4">
-                              <div className="mb-5">
-                                <p className="lead fw-normal mb-1">About</p>
-                                <div className="p-4" style={{ backgroundColor: '#f8f9fa' }}>
-                                  <MDBCardText className="font-italic mb-1">Produit: {value.produitEnchere}</MDBCardText>
-                                  <MDBCardText className="font-italic mb-1">Date de publication: {value.dateHeure}</MDBCardText>
-                                  <MDBCardText className="font-italic mb-0">Duree: {value.duree} jour</MDBCardText>
-                                </div>
-                              </div>
-                              <div className="d-flex justify-content-between align-items-center mb-4">
-                                <MDBCardText className="lead fw-normal mb-0">Photos</MDBCardText>
-                              </div>
-                              <MDBRow>
-                                <MDBCol className="mb-2">
-                                  <MDBCardImage src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(112).webp"
-                                    alt="image 1" className="w-100 rounded-3" />
-                                </MDBCol>
-                                <MDBCol className="mb-2">
-                                  <MDBCardImage src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(107).webp"
-                                    alt="image 1" className="w-100 rounded-3" />
-                                </MDBCol>
-                              </MDBRow>
-                              <MDBRow className="g-2">
-                                <MDBCol className="mb-2">
-                                  <MDBCardImage src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(108).webp"
-                                    alt="image 1" className="w-100 rounded-3" />
-                                </MDBCol>
-                                <MDBCol className="mb-2">
-                                  <MDBCardImage src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(114).webp"
-                                    alt="image 1" className="w-100 rounded-3" />
-                                </MDBCol>
-                              </MDBRow>
-                            </MDBCardBody>
-                          </MDBCard>
-                        </MDBCol>
-                      </MDBRow>
-                    </MDBContainer>
-                );
-              })
-              :
-              ''
-          }
+                          </div>
+                        </div>
+                        <MDBCardBody className="text-black p-4">
+                          <div className="mb-5">
+                            <p className="lead fw-normal mb-1">About</p>
+                            <div className="p-4" style={{ backgroundColor: '#f8f9fa' }}>
+                              <MDBCardText className="font-italic mb-1">Produit: {value.produitEnchere}</MDBCardText>
+                              <MDBCardText className="font-italic mb-1">Date de publication: {value.dateHeure}</MDBCardText>
+                              <MDBCardText className="font-italic mb-0">Duree: {value.duree} jour</MDBCardText>
+                            </div>
+                          </div>
+                          <div className="d-flex justify-content-between align-items-center mb-4">
+                            <MDBCardText className="lead fw-normal mb-0">Photos</MDBCardText>
+                          </div>
+                          <MDBRow>
+                            <MDBCol className="mb-2">
+                              <MDBCardImage src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(112).webp"
+                                alt="image 1" className="w-100 rounded-3" />
+                            </MDBCol>
+                            <MDBCol className="mb-2">
+                              <MDBCardImage src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(107).webp"
+                                alt="image 1" className="w-100 rounded-3" />
+                            </MDBCol>
+                          </MDBRow>
+                          <MDBRow className="g-2">
+                            <MDBCol className="mb-2">
+                              <MDBCardImage src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(108).webp"
+                                alt="image 1" className="w-100 rounded-3" />
+                            </MDBCol>
+                            <MDBCol className="mb-2">
+                              <MDBCardImage src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(114).webp"
+                                alt="image 1" className="w-100 rounded-3" />
+                            </MDBCol>
+                          </MDBRow>
+                        </MDBCardBody>
+                      </MDBCard>
+                    </MDBCol>
+                  </MDBRow>
+                </MDBContainer>
+              );
+            })
+            :
+            ''
+        }
       </Modal>
 
       {/* modal connexion */}
       <Modal show={isopen} size="lg" onHide={() => setIsOpen(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title id="example-modal-sizes-title-lg">
-            <h1 className="justify-content-center" style={{ cursor: "pointer" }}>VenteEnchere <Icon.Hammer /></h1>
+        <Modal.Header closeButton style={{textAlign:'center'}}>
+          <Modal.Title>
+            <h1 style={{ cursor: "pointer"}}>VenteEnchere <Icon.Hammer /></h1>
           </Modal.Title>
         </Modal.Header>
         <section className="vh-100">
@@ -365,11 +368,11 @@ const Accueil = () => {
                 </div>
                 <form>
                   <div className="form-outline mb-4">
-                    <input type="email" id="identifiant" className="form-control form-control-lg"
+                    <input value={"Mbola"} type="email" id="identifiant" className="form-control form-control-lg"
                       placeholder="Identifiant" />
                   </div>
                   <div className="form-outline mb-3">
-                    <input type="password" id="pwd" className="form-control form-control-lg"
+                    <input value={"mbola"} type="password" id="pwd" className="form-control form-control-lg"
                       placeholder="Enter password" />
                   </div>
 
