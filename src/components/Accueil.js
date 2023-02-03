@@ -129,11 +129,6 @@ const Accueil = () => {
     })
   }
 
-  useEffect(() => {
-    listeenchere();
-    // eslint-disable-next-line
-  }, []);
-
   //recherche avancée
   function recherche() {
     axios.get("https://backofficeventeenchere-production-db7d.up.railway.app/rechercheAvanceFront?search=" + document.getElementById("recherche").value).then((res) => {
