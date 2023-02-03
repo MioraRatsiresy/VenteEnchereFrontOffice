@@ -15,6 +15,7 @@ import Button from 'react-bootstrap/Button';
 import { MDBCol, MDBContainer, MDBRow, MDBCard, MDBCardText, MDBCardBody, MDBCardImage, MDBTypography } from 'mdb-react-ui-kit';
 import { Utilisateur } from "../model/Utilisateur";
 import Profil from "./Profil";
+import { UncontrolledTooltip } from "reactstrap";
 
 const Accueil = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const Accueil = () => {
   const [plafond, setPlafond] = useState();
   const [profil, setProfil] = useState(null);
   const [photos, setPhoto] = useState(null);
+  const [etatenchere, setetatenchere] = useState(null);
 
   const handleChange = (event) => {
     const name = event.target.name;
@@ -52,6 +54,7 @@ const Accueil = () => {
   //profil
   function maprofil() {
     setEnchere(null);
+    setetatenchere(null);
     setProfil(1);
   }
   //login client
@@ -96,6 +99,7 @@ const Accueil = () => {
           sessionStorage.clear();
           setMontant(0);
           setProfil(null);
+          setetatenchere(null);
           navigate("/");
         }
         else {
@@ -110,6 +114,7 @@ const Accueil = () => {
     axios.get("https://backofficeventeenchere-production-db7d.up.railway.app/listeEnchereFront").then((res) => {
       console.log(res.data);
       setEnchere(res.data);
+      setetatenchere(null);
       setProfil(null);
     })
   }
@@ -119,6 +124,7 @@ const Accueil = () => {
     axios.get("https://backofficeventeenchere-production-db7d.up.railway.app/getMesEncheres/" + sessionStorage.getItem("idUser") + "/" + sessionStorage.getItem("TokenUser")).then((res) => {
       console.log(res.data);
       setEnchere(res.data);
+      setetatenchere(1);
       setProfil(null);
     })
   }
@@ -224,9 +230,16 @@ const Accueil = () => {
                         {
                           value.statut !== "Termine" ?
                             sessionStorage.getItem("idUser") != null && parseInt(value.idClient) === parseInt(sessionStorage.getItem("idUser")) ?
-                              <Icon.DoorClosed style={{ cursor: 'pointer' }} />
+                              <><Icon.PersonBadge id="amoi" style={{ cursor: 'pointer' }} />
+                                <UncontrolledTooltip placement="right" target="amoi">
+                                  Mes enchères
+                                </UncontrolledTooltip></>
                               :
-                              <Icon.BagPlusFill style={{ cursor: 'pointer' }} onClick={rencherir.bind(this, value.idEnchere, value.montant)} />
+                              <><Icon.Hammer id="autres" style={{ cursor: 'pointer' }} onClick={rencherir.bind(this, value.idEnchere, value.montant)} />
+                                <UncontrolledTooltip placement="right" target="autres">
+                                  Autres
+                                </UncontrolledTooltip>
+                              </>
                             :
                             <Icon.StopBtn />
                         }
@@ -234,7 +247,25 @@ const Accueil = () => {
                         <Card.Body>
                           <Card.Title onClick={() => ficheEnchere(value.idEnchere)} style={{ cursor: 'pointer' }}>{value.libelle} </Card.Title>
                           <Card.Text>
-                            Prix :{value.montant} Ar
+                            {
+                              sessionStorage.getItem("idUser") != null && etatenchere == null ?
+                                parseInt(value.client) === parseInt(sessionStorage.getItem("idUser")) ?
+                                  <p style={{ color: 'red' }}>Moi</p>
+                                  :
+                                  <p style={{ color: 'green' }}>Pris</p>
+                                :
+                                ''
+                            }
+                            {
+                              etatenchere != null ?
+                                value.nom != null ?
+                                  <p style={{ color: 'blue' }}>{value.nom} {value.prenom}</p>
+                                  :
+                                  <p style={{ color: 'blue' }}>Aucune mise</p>
+                                :
+                                ''
+                            }
+                            Prix Actuelle :{value.montant} Ar
                             <br />
                             Fin:{value.dateFin}
                           </Card.Text>
@@ -341,7 +372,7 @@ const Accueil = () => {
             <div className="col-sm-6">
               {
                 plafond != null ?
-                  <>
+                  <><h4 style={{ color: "blue" }}>Prix plafond</h4>
                     {
                       plafond.length > 0 ?
                         <>
@@ -350,8 +381,8 @@ const Accueil = () => {
                         </>
                         :
                         <>
-                          <input type="number" id="montantmax" placeholder="Montant max" required></input>
-                          <input type="number" id="intervalle" placeholder="Intervalle" required></input>
+                          Montant: <input type="number" id="montantmax" placeholder="Montant max" required></input>
+                          Intervalle: <input type="number" id="intervalle" placeholder="Intervalle" required></input>
                           <Button onClick={insertPlafond.bind(this, enchereid)}>Ajouter</Button>
                         </>
                     }
@@ -416,17 +447,17 @@ const Accueil = () => {
                                   <>
                                     <MDBRow className="g-3">
                                       <MDBCol className="mb-2">
-                                        <MDBCardImage src={value.photo}
+                                        <MDBCardImage src={`data:image/jpeg;base64,${value.photo}`}
                                           alt="image 1" className="w-100 rounded-3" />
                                       </MDBCol>
-                                      </MDBRow>
+                                    </MDBRow>
 
-                                    </>
-                                    );
-                                })
-                                    :
-                                    'Aucun photo'
-                            }
+                                  </>
+                                );
+                              })
+                              :
+                              'Aucun photo'
+                          }
 
                         </MDBCardBody>
                       </MDBCard>
