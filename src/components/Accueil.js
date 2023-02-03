@@ -13,6 +13,8 @@ import vente from "../image/vente-enchere.jpg";
 import imgvente from "../image/vente.svg";
 import Button from 'react-bootstrap/Button';
 import { MDBCol, MDBContainer, MDBRow, MDBCard, MDBCardText, MDBCardBody, MDBCardImage, MDBBtn, MDBTypography, MDBIcon } from 'mdb-react-ui-kit';
+import { Utilisateur } from "../model/Utilisateur";
+import Profil from "./Profil";
 
 const Accueil = () => {
   const navigate = useNavigate();
@@ -25,7 +27,36 @@ const Accueil = () => {
   const [enchereid, setId] = useState(0);
   const [montantmax, setMontant] = useState(0);
   const [erreur, setErreur] = useState(null);
+  const [login, setLogin] = useState(null);
+  const [inputs, setInputs] = useState({});
+  const [plafond, setPlafond] = useState();
+  const [profil, setProfil] = useState(null);
+  const [photos, setPhoto] = useState(null);
 
+  const handleChange = (event) => {
+    console.log("Mikitika");
+    const name = event.target.name;
+    const value = event.target.value;
+    console.log(name);
+    var temp = new Utilisateur();
+    if (login !== null) {
+      if (name === "identifiant") {
+        temp.identifiant = value;
+        temp.pwd = login.pwd;
+      }
+      else if (name === "pwd") {
+        temp.identifiant = login.identifiant;
+        temp.pwd = value;
+      }
+    }
+    setLogin(temp);
+    setInputs(values => ({ ...values, [name]: value }))
+  }
+  //profil
+  function maprofil() {
+    setEnchere(null);
+    setProfil(1);
+  }
   //login client
   function verifyLogin() {
     var identifiant = document.getElementById('identifiant').value;
@@ -38,14 +69,23 @@ const Accueil = () => {
         console.log(sessionStorage.getItem("idUser"));
         setEtat(0);
         setIsOpen(false);
-        if(montantmax!==0){
-        setRencherir(true);
+        if (montantmax !== 0) {
+          setRencherir(true);
         }
         //navigate("/accueil");
       }
       else {
         setEtat(1);
       }
+    })
+  }
+
+  //function get plafond
+  function getPlafond(id) {
+    console.log("Plafond")
+    axios.get("http://localhost:4444/enchereplafond/" + id, { params: { "idclient": sessionStorage.getItem("idUser") } }).then((res) => {
+      console.log(res.data);
+      setPlafond(res.data["plafond"]);
     })
   }
 
@@ -58,6 +98,7 @@ const Accueil = () => {
         if (retour['message'] === "Logout with success") {
           sessionStorage.clear();
           setMontant(0);
+          setProfil(null);
           navigate("/");
         }
         else {
@@ -72,6 +113,7 @@ const Accueil = () => {
     axios.get("http://localhost:4444/listeEnchereFront").then((res) => {
       console.log(res.data);
       setEnchere(res.data);
+      setProfil(null);
     })
   }
 
@@ -80,6 +122,7 @@ const Accueil = () => {
     axios.get("http://localhost:4444/getMesEncheres/" + sessionStorage.getItem("idUser") + "/" + sessionStorage.getItem("TokenUser")).then((res) => {
       console.log(res.data);
       setEnchere(res.data);
+      setProfil(null);
     })
   }
 
@@ -99,9 +142,10 @@ const Accueil = () => {
     setId(id);
     setMontant(montant);
     if (sessionStorage.getItem("TokenUser") == null) {
-      setIsOpen(true);
+      loginUser();
     }
     else {
+      getPlafond(id);
       setRencherir(true);
     }
   }
@@ -122,9 +166,31 @@ const Accueil = () => {
     axios.get("http://localhost:4444/ficheenchere/" + id).then((res) => {
       console.log(res.data);
       setFiche(res.data);
-      setVoirFiche(true);
     })
-
+    axios.get("http://localhost:4444/getPhotoEnchere/" + id).then((res) => {
+      console.log(res.data);
+      setPhoto(res.data["photo"]);
+    })
+    setVoirFiche(true);
+  }
+  function loginUser() {
+    var log = new Utilisateur();
+    log.identifiant = "Mbola";
+    log.pwd = "mbola";
+    setLogin(log);
+    setIsOpen(true);
+  }
+  function insertPlafond(id) {
+    axios.post("http://localhost:4444/insertenchereplafond/" + id, null, { params: { "idclient": sessionStorage.getItem("idUser"), "montant": document.getElementById("montantmax").value, "intervalle": document.getElementById("intervalle").value } }).then((res) => {
+      console.log(res.data);
+      if (res.data["Erreur"] != null) {
+        setErreur(res.data["Erreur"]);
+      }
+      else {
+        setRencherir(false);
+        alert("Insertion avec succès");
+      }
+    })
   }
   return (
     <div id="container">
@@ -142,10 +208,11 @@ const Accueil = () => {
           sessionStorage.getItem("TokenUser") != null ?
             <>
               <div style={{ cursor: "pointer" }} onClick={mesencheres}>Mes Encheres</div>
+              <div style={{ cursor: "pointer" }} onClick={maprofil}>Profil</div>
               <div onClick={logout} style={{ cursor: "pointer" }}>Logout</div>
             </>
             :
-            <div onClick={() => setIsOpen(true)} style={{ cursor: "pointer" }}>Login</div>
+            <div onClick={() => loginUser()} style={{ cursor: "pointer" }}>Login</div>
         }
       </header>
       <aside style={{ margin: "2%" }}>
@@ -191,6 +258,12 @@ const Accueil = () => {
                 })
               }
             </Row>
+            :
+            ''
+        }
+        {
+          profil != null ?
+            <Profil></Profil>
             :
             ''
         }
@@ -261,10 +334,36 @@ const Accueil = () => {
               ''
           }
           <p style={{ color: "red" }}>* Montant minimal: {montantmax}</p>
-          <input type="number" id="montantdonne" placeholder="Montant" className="form-control form-control-lg"></input>
-          <Button variant="primary" onClick={ValiderRencherir}>
-            Valider
-          </Button>
+          <div className="row">
+            <div className="col-sm-6">
+              <input type="number" id="montantdonne" placeholder="Montant" className="form-control form-control-lg"></input>
+              <Button variant="primary" onClick={ValiderRencherir}>
+                Valider
+              </Button>
+            </div>
+            <div className="col-sm-6">
+              {
+                plafond != null ?
+                  <>
+                    {
+                      plafond.length > 0 ?
+                        <>
+                          <p>Montant: {plafond[0].montant} Ar</p>
+                          <p>Intervalle: {plafond[0].intervalle} Ar</p>
+                        </>
+                        :
+                        <>
+                          <input type="number" id="montantmax" placeholder="Montant max" required></input>
+                          <input type="number" id="intervalle" placeholder="Intervalle" required></input>
+                          <Button onClick={insertPlafond.bind(this, enchereid)}>Ajouter</Button>
+                        </>
+                    }
+                  </>
+                  :
+                  ''
+              }
+            </div>
+          </div>
         </Modal.Body>
       </Modal>
 
@@ -313,26 +412,25 @@ const Accueil = () => {
                           <div className="d-flex justify-content-between align-items-center mb-4">
                             <MDBCardText className="lead fw-normal mb-0">Photos</MDBCardText>
                           </div>
-                          <MDBRow>
-                            <MDBCol className="mb-2">
-                              <MDBCardImage src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(112).webp"
-                                alt="image 1" className="w-100 rounded-3" />
-                            </MDBCol>
-                            <MDBCol className="mb-2">
-                              <MDBCardImage src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(107).webp"
-                                alt="image 1" className="w-100 rounded-3" />
-                            </MDBCol>
-                          </MDBRow>
-                          <MDBRow className="g-2">
-                            <MDBCol className="mb-2">
-                              <MDBCardImage src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(108).webp"
-                                alt="image 1" className="w-100 rounded-3" />
-                            </MDBCol>
-                            <MDBCol className="mb-2">
-                              <MDBCardImage src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(114).webp"
-                                alt="image 1" className="w-100 rounded-3" />
-                            </MDBCol>
-                          </MDBRow>
+                          {
+                            photos != null && photos.length > 0 ?
+                              photos.map((value, id) => {
+                                return (
+                                  <>
+                                    <MDBRow className="g-3">
+                                      <MDBCol className="mb-2">
+                                        <MDBCardImage src={value.photo}
+                                          alt="image 1" className="w-100 rounded-3" />
+                                      </MDBCol>
+                                      </MDBRow>
+
+                                    </>
+                                    );
+                                })
+                                    :
+                                    'Aucun photo'
+                            }
+
                         </MDBCardBody>
                       </MDBCard>
                     </MDBCol>
@@ -346,14 +444,14 @@ const Accueil = () => {
       </Modal>
 
       {/* modal connexion */}
-      <Modal show={isopen} size="lg" onHide={() => setIsOpen(false)}>
-        <Modal.Header closeButton style={{textAlign:'center'}}>
+      <Modal show={isopen} size="lg" height="200px" onHide={() => setIsOpen(false)}>
+        <Modal.Header closeButton style={{ textAlign: 'center' }}>
           <Modal.Title>
-            <h1 style={{ cursor: "pointer"}}>VenteEnchere <Icon.Hammer /></h1>
+            <h1 style={{ cursor: "pointer" }}>VenteEnchere <Icon.Hammer /></h1>
           </Modal.Title>
         </Modal.Header>
-        <section className="vh-100">
-          <div className="container-fluid h-custom" style={{ width: "80%", backgroundColor: "white", opacity: "0.9", borderRadius: "20px" }}>
+        <section>
+          <div className="container-fluid h-custom" style={{ backgroundColor: "white", opacity: "0.9", borderRadius: "20px" }}>
             <div className="row d-flex justify-content-center align-items-center h-100">
               <div className="col-md-9 col-lg-6 col-xl-5">
                 <img src={vente}
@@ -367,29 +465,34 @@ const Accueil = () => {
                   </div>
                 </div>
                 <form>
-                  <div className="form-outline mb-4">
-                    <input value={"Mbola"} type="email" id="identifiant" className="form-control form-control-lg"
-                      placeholder="Identifiant" />
-                  </div>
-                  <div className="form-outline mb-3">
-                    <input value={"mbola"} type="password" id="pwd" className="form-control form-control-lg"
-                      placeholder="Enter password" />
-                  </div>
+                  {login != null ?
+                    <>
+                      <div className="form-outline mb-4">
+                        <input value={login.identifiant} type="email" onChange={handleChange} id="identifiant" className="form-control form-control-lg"
+                          placeholder="Identifiant" />
+                      </div>
+                      <div className="form-outline mb-3">
+                        <input value={login.pwd} type="password" id="pwd" onChange={handleChange} className="form-control form-control-lg"
+                          placeholder="Enter password" />
+                      </div>
 
-                  <div className="text-center text-lg-start mt-4 pt-2">
-                    <div className="row justify-content-center">
-                      <button type="button" className="btn btn-primary btn-lg"
-                        style={{ paddingLeft: "2.5rem", paddingRight: "2.5rem" }} onClick={verifyLogin}>Login</button>
-                      {
-                        etat === 1 ?
-                          <Alert key={"danger"} variant={"danger"}>
-                            Mot de passe ou identifiant erroné!!!!
-                          </Alert>
-                          :
-                          ''
-                      }
-                    </div>
-                  </div>
+                      <div className="text-center text-lg-start mt-4 pt-2">
+                        <div className="row justify-content-center">
+                          <button type="button" className="btn btn-primary btn-lg"
+                            style={{ paddingLeft: "2.5rem", paddingRight: "2.5rem" }} onClick={verifyLogin}>Login</button>
+                          {
+                            etat === 1 ?
+                              <Alert key={"danger"} variant={"danger"}>
+                                Mot de passe ou identifiant erroné!!!!
+                              </Alert>
+                              :
+                              ''
+                          }
+                        </div>
+                      </div>
+                    </>
+                    : ''
+                  }
 
                 </form>
               </div>
