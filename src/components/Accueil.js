@@ -28,13 +28,11 @@ const Accueil = () => {
   const [montantmax, setMontant] = useState(0);
   const [erreur, setErreur] = useState(null);
   const [login, setLogin] = useState(null);
-  const [inputs, setInputs] = useState({});
   const [plafond, setPlafond] = useState();
   const [profil, setProfil] = useState(null);
   const [photos, setPhoto] = useState(null);
 
   const handleChange = (event) => {
-    console.log("Mikitika");
     const name = event.target.name;
     const value = event.target.value;
     console.log(name);
@@ -50,7 +48,6 @@ const Accueil = () => {
       }
     }
     setLogin(temp);
-    setInputs(values => ({ ...values, [name]: value }))
   }
   //profil
   function maprofil() {
@@ -414,7 +411,7 @@ const Accueil = () => {
                           </div>
                           {
                             photos != null && photos.length > 0 ?
-                              photos.map((value, id) => {
+                              photos.map((value) => {
                                 return (
                                   <>
                                     <MDBRow className="g-3">
