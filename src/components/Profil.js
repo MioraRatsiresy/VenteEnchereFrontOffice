@@ -7,13 +7,13 @@ const Profil = () => {
     const [profil, setProfil] = useState(null);
     const [solde, setSolde] = useState(null);
     function getProfil() {
-        axios.get("http://localhost:4444/getClientById/" + sessionStorage.getItem("idUser") + "/" + sessionStorage.getItem("TokenUser")).then((res) => {
+        axios.get("https://backofficeventeenchere-production-db7d.up.railway.app/getClientById/" + sessionStorage.getItem("idUser") + "/" + sessionStorage.getItem("TokenUser")).then((res) => {
             console.log(res.data);
             setProfil(res.data["client"]);
         })
     }
     function getSolde() {
-        axios.get("http://localhost:4444/getSoldeClient/" + sessionStorage.getItem("idUser")).then((res) => {
+        axios.get("https://backofficeventeenchere-production-db7d.up.railway.app/getSoldeClient/" + sessionStorage.getItem("idUser")).then((res) => {
             console.log(res.data);
             setSolde(res.data["solde"]);
         })

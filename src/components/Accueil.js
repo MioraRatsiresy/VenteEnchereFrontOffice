@@ -61,7 +61,7 @@ const Accueil = () => {
   function verifyLogin() {
     var identifiant = document.getElementById('identifiant').value;
     var pwd = document.getElementById('pwd').value;
-    axios.post("http://localhost:4444/login/traitementClient?identifiant=" + identifiant + "&pwd=" + pwd).then((response) => {
+    axios.post("https://backofficeventeenchere-production-db7d.up.railway.app/login/traitementClient?identifiant=" + identifiant + "&pwd=" + pwd).then((response) => {
       if (response.data['message'] === "Login correcte") {
         sessionStorage.setItem("TokenUser", response.data["token"]);
         sessionStorage.setItem("idUser", response.data["iduser"]);
@@ -83,7 +83,7 @@ const Accueil = () => {
   //function get plafond
   function getPlafond(id) {
     console.log("Plafond")
-    axios.get("http://localhost:4444/enchereplafond/" + id, { params: { "idclient": sessionStorage.getItem("idUser") } }).then((res) => {
+    axios.get("https://backofficeventeenchere-production-db7d.up.railway.app/enchereplafond/" + id, { params: { "idclient": sessionStorage.getItem("idUser") } }).then((res) => {
       console.log(res.data);
       setPlafond(res.data["plafond"]);
     })
@@ -105,12 +105,12 @@ const Accueil = () => {
         }
       }
     }
-    xmlhttp.open("GET", "http://localhost:4444/logout");
+    xmlhttp.open("GET", "https://backofficeventeenchere-production-db7d.up.railway.app/logout");
     xmlhttp.send();
   }
   //liste enchere
   function listeenchere() {
-    axios.get("http://localhost:4444/listeEnchereFront").then((res) => {
+    axios.get("https://backofficeventeenchere-production-db7d.up.railway.app/listeEnchereFront").then((res) => {
       console.log(res.data);
       setEnchere(res.data);
       setProfil(null);
@@ -119,7 +119,7 @@ const Accueil = () => {
 
   //historique
   function mesencheres() {
-    axios.get("http://localhost:4444/getMesEncheres/" + sessionStorage.getItem("idUser") + "/" + sessionStorage.getItem("TokenUser")).then((res) => {
+    axios.get("https://backofficeventeenchere-production-db7d.up.railway.app/getMesEncheres/" + sessionStorage.getItem("idUser") + "/" + sessionStorage.getItem("TokenUser")).then((res) => {
       console.log(res.data);
       setEnchere(res.data);
       setProfil(null);
@@ -133,7 +133,7 @@ const Accueil = () => {
 
   //recherche avancée
   function recherche() {
-    axios.get("http://localhost:4444/rechercheAvanceFront?search=" + document.getElementById("recherche").value).then((res) => {
+    axios.get("https://backofficeventeenchere-production-db7d.up.railway.app/rechercheAvanceFront?search=" + document.getElementById("recherche").value).then((res) => {
       console.log(res.data);
       setEnchere(res.data);
     })
@@ -150,7 +150,7 @@ const Accueil = () => {
     }
   }
   function ValiderRencherir() {
-    axios.post("http://localhost:4444/miser/" + enchereid + "/" + sessionStorage.getItem("TokenUser"), null, { params: { "idclient": sessionStorage.getItem("idUser"), "montant": document.getElementById("montantdonne").value } }).then((res) => {
+    axios.post("https://backofficeventeenchere-production-db7d.up.railway.app/miser/" + enchereid + "/" + sessionStorage.getItem("TokenUser"), null, { params: { "idclient": sessionStorage.getItem("idUser"), "montant": document.getElementById("montantdonne").value } }).then((res) => {
       console.log(res.data);
       if (res.data["Compte"] != null) {
         setErreur(res.data["Compte"]);
@@ -163,11 +163,11 @@ const Accueil = () => {
 
   //fiche enchere
   function ficheEnchere(id) {
-    axios.get("http://localhost:4444/ficheenchere/" + id).then((res) => {
+    axios.get("https://backofficeventeenchere-production-db7d.up.railway.app/ficheenchere/" + id).then((res) => {
       console.log(res.data);
       setFiche(res.data);
     })
-    axios.get("http://localhost:4444/getPhotoEnchere/" + id).then((res) => {
+    axios.get("https://backofficeventeenchere-production-db7d.up.railway.app/getPhotoEnchere/" + id).then((res) => {
       console.log(res.data);
       setPhoto(res.data["photo"]);
     })
@@ -181,7 +181,7 @@ const Accueil = () => {
     setIsOpen(true);
   }
   function insertPlafond(id) {
-    axios.post("http://localhost:4444/insertenchereplafond/" + id, null, { params: { "idclient": sessionStorage.getItem("idUser"), "montant": document.getElementById("montantmax").value, "intervalle": document.getElementById("intervalle").value } }).then((res) => {
+    axios.post("https://backofficeventeenchere-production-db7d.up.railway.app/insertenchereplafond/" + id, null, { params: { "idclient": sessionStorage.getItem("idUser"), "montant": document.getElementById("montantmax").value, "intervalle": document.getElementById("intervalle").value } }).then((res) => {
       console.log(res.data);
       if (res.data["Erreur"] != null) {
         setErreur(res.data["Erreur"]);
