@@ -12,7 +12,7 @@ import Modal from 'react-bootstrap/Modal';
 import vente from "../image/vente-enchere.jpg";
 import imgvente from "../image/vente.svg";
 import Button from 'react-bootstrap/Button';
-import { MDBCol, MDBContainer, MDBRow, MDBCard, MDBCardText, MDBCardBody, MDBCardImage, MDBBtn, MDBTypography, MDBIcon } from 'mdb-react-ui-kit';
+import { MDBCol, MDBContainer, MDBRow, MDBCard, MDBCardText, MDBCardBody, MDBCardImage, MDBTypography } from 'mdb-react-ui-kit';
 import { Utilisateur } from "../model/Utilisateur";
 import Profil from "./Profil";
 
