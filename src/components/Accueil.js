@@ -195,6 +195,15 @@ const Accueil = () => {
       }
     })
   }
+  function testvalue(){
+    if(document.getElementById("montantdonne").value<=montantmax){
+      document.getElementById("validation").disabled=true;
+    }
+    else{
+      document.getElementById("validation").disabled=false;
+      document.getElementById("validation").onclick=ValiderRencherir;
+    }
+  }
   return (
     <div id="container">
       <header>
@@ -361,11 +370,11 @@ const Accueil = () => {
               :
               ''
           }
-          <p style={{ color: "red" }}>* Montant minimal: {montantmax}</p>
+          <p style={{ color: "red" }}>* Montant minimal: {montantmax+1}</p>
           <div className="row">
             <div className="col-sm-6">
-              <input type="number" id="montantdonne" placeholder="Montant" className="form-control form-control-lg"></input>
-              <Button variant="primary" onClick={ValiderRencherir}>
+              <input type="number" onChange={testvalue} id="montantdonne" placeholder="Montant" className="form-control form-control-lg"></input>
+              <Button variant="primary" id="validation" disabled>
                 Valider
               </Button>
             </div>
